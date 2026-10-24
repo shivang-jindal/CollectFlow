@@ -3,7 +3,27 @@
   "version": "1.0.0",
   "private": true,
   "description": "CollectFlow - invoice and payment collection workflow for small businesses.",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "MIT",
+  "homepage": "https://github.com/shivang-jindal/CollectFlow#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/shivang-jindal/CollectFlow.git"
+  },
+  "bugs": {
+    "url": "https://github.com/shivang-jindal/CollectFlow/issues"
+  },
+  "keywords": [
+    "invoice",
+    "payments",
+    "saas",
+    "billing",
+    "stripe",
+    "multi-tenant",
+    "react",
+    "express",
+    "drizzle",
+    "typescript"
+  ],
   "engines": {
     "node": ">=20.11"
   },
