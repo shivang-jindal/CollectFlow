@@ -136,7 +136,7 @@ export function AppRouter() {
         <Route path="/public/invoices/:token" element={<PublicInvoicePage />} />
         <Route path="/dashboard" element={<RequireSession><RedirectToFirstOrganization /></RequireSession>} />
         <Route
-          path="/:organizationId"
+          path="/:organizationId/*"
           element={
             <RequireSession>
               <RequireOrganization>
