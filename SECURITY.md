@@ -76,9 +76,9 @@ Other authentication behaviours:
   accepted_at IS NULL`, so two concurrent accepts cannot both succeed. Reset
   routes return `404` in production.
 
-**Not implemented:** email verification, multi-factor authentication, breached
-password checks, login throttling (see §9), session management UI, and
-per-user SSO.
+**Not implemented:** a separate local email-verification flow (Google's verified
+email is required instead), multi-factor authentication, breached password
+checks, login throttling (see §9), session management UI, and per-user SSO.
 
 ---
 
