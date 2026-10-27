@@ -52,26 +52,29 @@ shared `ENCRYPTION_KEY` across tenants), and the limitations listed in §9.
 
 | Concern | Implementation |
 | --- | --- |
-| Password hashing | Argon2id via `@node-rs/argon2` — `memoryCost 19456 KiB`, `timeCost 2`, `parallelism 1`, 32-byte output (`server/src/lib/crypto.ts`). No hand-rolled KDF. |
+| Sign-in | Google only. The browser obtains a Firebase ID token and the server verifies its RS256 signature against Google's published keys, the project issuer and audience, `sign_in_provider === "google.com"` and a verified email. Accounts are matched by that verified email; a Google-created account has `password_hash = NULL`, so a guessed password can never reach it. With no Firebase project configured the button renders disabled and the API refuses the request. |
+| Password hashing (development only) | Argon2id via `@node-rs/argon2` — `memoryCost 19456 KiB`, `timeCost 2`, `parallelism 1`, 32-byte output (`server/src/lib/crypto.ts`). No hand-rolled KDF. Used by the seed and the automated tests; the web app has no password form and production returns `404` for the password routes. |
 | Session token | 32 bytes (256 bits) from `node:crypto` `randomBytes`, base64url-encoded |
 | Session storage | Only `SHA-256(token)` is stored in `sessions.token_hash` (unique index). The token itself is never persisted. |
 | Transport of the session | HTTP-only cookie `collectflow_session` (configurable via `SESSION_COOKIE_NAME`), `SameSite=Lax`, `Path=/`, `Expires` set from `SESSION_TTL_HOURS`, `Secure` when `COOKIE_SECURE` is on — which defaults to on in production |
-| Server-side revocation | `sessions.revoked_at`; `POST /api/v1/auth/logout` revokes, password change and password reset revoke **all** sessions for the user |
+| Server-side revocation | `sessions.revoked_at`; `POST /api/v1/auth/logout` revokes, and in development the password change and reset flows revoke **all** sessions for the user |
 | Expiry | Enforced on every request in `AuthService.authenticate`; the `maintenance.cleanup` job deletes sessions past `expires_at` and revoked sessions older than 30 days |
 | Browser storage | No token in `localStorage` or `sessionStorage`. `client/src/lib/api.ts` uses `credentials: 'include'` on every call. |
 | Alternative credential | `Authorization: Bearer <token>` is accepted by `sessionTokenOf` for API clients and tests; the token is the same opaque session token and is never logged (see §7) |
 
 Other authentication behaviours:
 
-- Login failures return the identical message and status whether the account
-  does not exist or the password is wrong, and always run an Argon2 verification
-  against a dummy hash, so the two cases take a comparable amount of time
+- The development-only password flow (seed and tests) returns the identical
+  message and status whether the account does not exist or the password is
+  wrong, and always runs an Argon2 verification against a dummy hash, so the two
+  cases take a comparable amount of time
   (`server/src/services/auth.service.ts`).
-- Passwords must be at least 10 characters (`shared/src/schemas.ts`).
-- Password reset tokens and invitation tokens are 256-bit random, stored only as
-  SHA-256 hashes, expire (60 minutes / 7 days) and are single-use. Invitation
-  acceptance claims the row with a conditional `UPDATE ... WHERE accepted_at IS
-  NULL`, so two concurrent accepts cannot both succeed.
+- Development passwords must be at least 10 characters (`shared/src/schemas.ts`).
+- Development password reset tokens and invitation tokens are 256-bit random,
+  stored only as SHA-256 hashes, expire (60 minutes / 7 days) and are single-use.
+  Invitation acceptance claims the row with a conditional `UPDATE ... WHERE
+  accepted_at IS NULL`, so two concurrent accepts cannot both succeed. Reset
+  routes return `404` in production.
 
 **Not implemented:** email verification, multi-factor authentication, breached
 password checks, login throttling (see §9), session management UI, and
@@ -275,7 +278,7 @@ read the environment can decrypt every organization's stored credentials.
 | Data | Why |
 | --- | --- |
 | Card numbers, CVV, or any card track data | CollectFlow is not a payment processor and has no field for it. Online payments, when a provider is connected, happen on the provider's hosted page. |
-| Plaintext passwords | Only an Argon2id hash is written to `users.password_hash` |
+| Plaintext passwords | Never stored. Development accounts keep only an Argon2id hash in `users.password_hash`; Google accounts keep `NULL` |
 | Session tokens | Only `SHA-256(token)` in `sessions.token_hash` |
 | Raw `Authorization` headers | Pino redaction plus the fact that no code path logs them |
 | SMTP passwords | Environment variables only; never echoed to a response or a log |

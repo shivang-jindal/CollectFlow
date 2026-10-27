@@ -8,7 +8,6 @@ import { CreateOrganizationPage } from './pages/CreateOrganization';
 import { CustomerDetailPage } from './pages/CustomerDetail';
 import { CustomersPage } from './pages/Customers';
 import { DashboardPage } from './pages/Dashboard';
-import { ForgotPasswordPage } from './pages/ForgotPassword';
 import { IntegrationsPage } from './pages/Integrations';
 import { InvoiceDetailPage } from './pages/InvoiceDetail';
 import { InvoiceEditorPage } from './pages/InvoiceEditor';
@@ -17,10 +16,8 @@ import { LoginPage } from './pages/Login';
 import { NotFoundPage } from './pages/NotFound';
 import { PaymentsPage } from './pages/Payments';
 import { PublicInvoicePage } from './pages/PublicInvoice';
-import { RegisterPage } from './pages/Register';
 import { RemindersPage } from './pages/Reminders';
 import { ReportsPage } from './pages/Reports';
-import { ResetPasswordPage } from './pages/ResetPassword';
 import { SettingsPage } from './pages/Settings';
 
 function FullPageLoading() {
@@ -118,9 +115,9 @@ export function AppRouter() {
     <SessionProvider>
       <Routes>
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password" element={<ResetPasswordPage />} />
+        <Route path="/register" element={<Navigate to="/login" replace />} />
+        <Route path="/forgot-password" element={<Navigate to="/login" replace />} />
+        <Route path="/reset-password" element={<Navigate to="/login" replace />} />
         <Route path="/accept-invitation" element={<AcceptInvitationPage />} />
         <Route path="/welcome" element={<RequireSession><CreateOrganizationPage /></RequireSession>} />
         <Route

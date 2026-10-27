@@ -2,21 +2,14 @@
  * Critical journey: create customer -> create invoice -> send (no email) ->
  * record a payment -> dashboard reflects the balance.
  *
- * Runs against the seeded development database (`npm run db:seed`).
+ * Runs against the seeded development database (`npm run db:seed`) with the
+ * development server (`npm run dev`). Sign-in is Google-only in the browser, so
+ * the helper authenticates through the development-only API instead.
  */
 
 import { expect, test } from '@playwright/test';
 
-const EMAIL = process.env.SEED_EMAIL ?? 'demo@collectflow.test';
-const PASSWORD = process.env.SEED_PASSWORD ?? 'collectflow-demo-1234';
-
-async function signIn(page: import('@playwright/test').Page) {
-  await page.goto('/login');
-  await page.getByLabel('Email').fill(EMAIL);
-  await page.getByLabel('Password').fill(PASSWORD);
-  await page.getByRole('button', { name: 'Sign in' }).click();
-  await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible();
-}
+import { signIn } from './sign-in';
 
 test.describe('CollectFlow core journey', () => {
   test('an invoice can be created, sent, and paid', async ({ page }) => {
